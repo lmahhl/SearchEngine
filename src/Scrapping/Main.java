@@ -1,6 +1,8 @@
 package Scrapping;
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import Scrapping.*;
 public class Main {
@@ -19,8 +21,15 @@ public class Main {
         catch (IOException e) {
             e.printStackTrace();
         }
-        C.printURLslist();
-        System.out.println(C.getURLslist().size());
+        // C.printURLslist();
+        // System.out.println(C.getURLslist().size());
+        List <URLS> urls= new ArrayList<>();
+        urls = C.getURLslist();
+
+        DBconnection connect = new DBconnection();
+        //connect.GetData();
+        connect.SetURLsTable(urls);
+        //connect.GetData();
     }
 
 }
