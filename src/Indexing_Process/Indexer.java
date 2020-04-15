@@ -1,3 +1,6 @@
+package Indexing_Process;
+
+import Scrapping.DBconnection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.tartarus.snowball.SnowballStemmer;
@@ -6,14 +9,17 @@ import org.tartarus.snowball.ext.englishStemmer;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
 public class Indexer {
 
-
+    //Fields
+    DBconnection dbconnetion;
     String StemOfWord;
-
-    List<String> ExampleArr = new ArrayList<>();
-
-
+    List<List<String>>  WordArr = new ArrayList<List<String>>();
     String [] Stop_Word= new String []{"a", "about" ,"above" ,"after" ,"again" ,"against" ,"all", "am", "an" ,"and" ,"any", "are",
             "aren't" ,"as" ,"at", "be", "because", "been", "before" ,"being", "below", "between", "both",
             "but" ,"by" ,"can't", "cannot", "could", "couldn't", "did", "didn't", "do", "does" ,"doesn't", "doing"
@@ -30,6 +36,19 @@ public class Indexer {
             "with", "won't", "would", "wouldn't", "you", "you'd", "you'll", "you're", "you've" , "your" ,"yours" ,"yourself", "yourselves","-","'"};
 
 
+    //Constructor
+    public Indexer (DBconnection dBconnection)
+    {
+        this.dbconnetion = dBconnection;
+
+    }
+    //default constructor
+    public Indexer ()
+    {
+
+    }
+
+
     //TO CHECK IF THE WORD IS A STOPPING WORD OR NOT:
     public  boolean IsStoppingWord(String word){
         for (int i=0; i< Stop_Word.length ; i++)
@@ -43,10 +62,11 @@ public class Indexer {
         return false;
     }
     public int SearchDatabase(){
-        for(int x=0; x<ExampleArr.size() ; x++){
-            if(StemOfWord.equals(ExampleArr.get(x)))
+        WordArr=dbconnetion.getIDWord();
+        for(int x=0; x<WordArr.size() ; x++){
+            if(StemOfWord.equals(WordArr.get(x).get(1)))
             {
-                return x;
+                return Integer.parseInt(WordArr.get(x).get(0));
             }
         }
         return -1;
@@ -66,9 +86,12 @@ public class Indexer {
 
     public void Parsing() {
         try {
+            List<List<String>> links = new ArrayList<List<String>>();
 
             //we need to loop on all documents in database
-            Document doc = Jsoup.connect("https://www.bbc.com/news/world-europe-52271492").get();
+            links=dbconnetion.getLinks();
+            for(int y=0;y<links.size();y++){
+            Document doc = Jsoup.connect(links.get(y).get(1)).get();
 
             //to get text in html code
             String title = doc.title();
@@ -101,43 +124,44 @@ public class Indexer {
             // SPLIT TEXT TO WORDS:
             for(int i=0; i<Alltext.length ;i++) {
                 //check if tag exists:
-                if(Alltext[i].isEmpty())
+                if (Alltext[i].isEmpty())
                     continue;
 
                 result = Alltext[i].split("[()+;$*=#, ?.:!\"]+");
 
 
+                for (int j = 0; j < result.length; j++) {
 
+                    String LowerWord = result[j].toLowerCase();
+                    System.out.println("LowerWord is : " + LowerWord);
+                    boolean IsStoppingWord = IsStoppingWord(LowerWord);
 
-            for (int j = 0; j < result.length; j++) {
+                    if (IsStoppingWord)
+                        continue;
 
-                String LowerWord =result[j].toLowerCase();
-                System.out.println("LowerWord is : "+LowerWord);
-                boolean IsStoppingWord = IsStoppingWord(LowerWord);
+                    StemOfWord = Stemmer(LowerWord);
+                    System.out.println("StemOfword is : " + StemOfWord);
+                    int word_id = SearchDatabase();
+                    if (word_id == -1) {
+                        //Insert in database
+                        int new_word_id=dbconnetion.SetIndexTable(StemOfWord);
+                        int LinkID=Integer.parseInt(links.get(y).get(0));
+                        dbconnetion.SetLinkingTable(LinkID,new_word_id,i);
+                    } else {
+                        //update database
+                    }
 
-                if(IsStoppingWord)
-                    continue;
-
-                StemOfWord= Stemmer(LowerWord);
-                System.out.println("StemOfword is : "+StemOfWord);
-                int word_id=SearchDatabase();
-                if(word_id==-1){
-                    //Insert in database
-                    ExampleArr.add(StemOfWord);
                 }
-                else{
-                    //update database
-                }
-
-                }
-                for (int b= 0 ; b < ExampleArr.size() ; b ++)
-                {
-                   System.out.println(ExampleArr.get(b));
-                    System.out.println("----------------------------");
-                }
+//                for (int b = 0; b < ExampleArr.size(); b++) {
+//                    System.out.println(ExampleArr.get(b));
+//                    System.out.println("----------------------------");
+//                }
+            }
             }
         } catch (Exception e) {
             System.out.println(e);
         }
     }
+
+
 }
