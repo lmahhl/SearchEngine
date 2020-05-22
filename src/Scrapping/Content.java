@@ -1,26 +1,30 @@
 package Scrapping;
 
-public class URLS {
+public class Content {
 
     private String Link;
     private String Title;
     private String Content;
+    private boolean Visited;
 
-    public URLS (String link,String Title, String Content)
+    public Content (String link,String Title, String Content)
     {
         this.Link = link;
         this.Title = Title;
         this.Content=Content;
     }
-    public URLS ()
-    {
 
+
+    public Content(String link) {
+        this.Link=link;
     }
 
-    public URLS(String s) {
-        this.Link = s;
+    public boolean getVisited() {
+        return Visited;
     }
-
+    public void setVisited(boolean visited) {
+        Visited = visited;
+    }
     public String getLink() {
         return Link;
     }

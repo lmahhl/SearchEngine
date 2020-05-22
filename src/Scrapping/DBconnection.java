@@ -1,9 +1,7 @@
 package Scrapping;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import javax.swing.text.AbstractDocument;
+import java.sql.*;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -35,8 +33,8 @@ public class DBconnection {
 
                 int id = rs.getInt("ID");
                 String url = rs.getString("URL");
-                System.out.println(id);
-                System.out.println(url);
+               // System.out.println(id);
+               // System.out.println(url);
             }
 
 
@@ -45,18 +43,28 @@ public class DBconnection {
         }
 
     }
+    public List<Content> getUrls() throws SQLException {
+        List<Content> URLS= new ArrayList<>();
+        String query = "select * from urls";
+        rs = st.executeQuery(query);
+        while (rs.next()) {
 
-    public void SetURLsTable(List<URLS> urls) {
+            URLS.add(new Content(rs.getString("URL")));
+
+        }
+        return URLS;
+    }
+
+    public void setURLcontent(String url,String title,String content) {
         try {
-            for (int i = 0; i < urls.size(); i++) {
-
-                String url = urls.get(i).getLink();
-                String query = "INSERT INTO `urls` (`ID`, `URL`) VALUES (NULL, '"+url+"')";
+                String title2=title.replaceAll("'","''");
+                String content2= content.replaceAll("'","''");
+                String query = "INSERT INTO `urls` (`ID`, `URL`,`TITLE`,`CONTENT`) VALUES (NULL, '"+url+"','"+title2+"' , '"+content2+"')";
                 st.execute(query);
 
-            }
         } catch (Exception E) {
             System.out.println(E);
         }
     }
+
 }
