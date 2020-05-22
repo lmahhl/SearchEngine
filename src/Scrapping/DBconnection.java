@@ -55,11 +55,22 @@ public class DBconnection {
         return URLS;
     }
 
-    public void setURLcontent(String url,String title,String content) {
+
+    public void setURLcontent(String url,String title,String content,String H1,String H2,String H3, String H4, String H5, String H6) {
         try {
-                String title2=title.replaceAll("'","''");
-                String content2= content.replaceAll("'","''");
-                String query = "INSERT INTO `urls` (`ID`, `URL`,`TITLE`,`CONTENT`) VALUES (NULL, '"+url+"','"+title2+"' , '"+content2+"')";
+                String titleRep=title.replaceAll("'","''");
+                String contentRep= content.replaceAll("'","''");
+                String H1Rep=H1.replaceAll("'","''");
+                String H2Rep= H2.replaceAll("'","''");
+                String H3Rep=H3.replaceAll("'","''");
+                String H4Rep= H4.replaceAll("'","''");
+                String H5Rep=H5.replaceAll("'","''");
+                String H6Rep= H6.replaceAll("'","''");
+
+
+
+
+                String query = "INSERT INTO `urls` (`ID`, `URL`,`TITLE`,`CONTENT`,`H1`,`H2`,`H3`,`H4`,`H5`,`H6`) VALUES (NULL, '"+url+"','"+titleRep+"' , '"+contentRep+"', '"+H1Rep+"', '"+H2Rep+"', '"+H3Rep+"', '"+H4Rep+"', '"+H5Rep+"', '"+H6Rep+"')";
                 st.execute(query);
 
         } catch (Exception E) {
