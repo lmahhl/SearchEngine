@@ -30,12 +30,12 @@ public class Content {
         this.H4=H4;
         this.H5=H5;
         this.H6=H6;
-        this.Description= Description;
+        //this.Description= Description;
         this.Td=Td;
         this.Th=Th;
-        /*this.list=list;
+        this.list=list;
         this.OrderedList=OrderedList;
-        this.UnorderedList=UnorderedList;*/
+        this.UnorderedList=UnorderedList;
     }
 
 

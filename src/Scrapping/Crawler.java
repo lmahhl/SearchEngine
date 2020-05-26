@@ -6,8 +6,12 @@ import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.xml.sax.SAXException;
 
 import javax.net.ssl.SSLHandshakeException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
@@ -17,7 +21,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
 public class Crawler {
 
     private List<Content> pivotList;
@@ -41,8 +46,8 @@ public class Crawler {
             pivotList.get(i).setVisited(true);
             Document D;
             // Connecting to a URL
-            D = Jsoup.connect(pivotList.get(i).getLink()).header("Accept-Language", "en").get();
 
+            D = Jsoup.connect(pivotList.get(i).getLink()).header("Accept-Language", "en").get();
             // Getting the links in it
             Elements links = D.select("a[href]");
 
@@ -74,6 +79,12 @@ public class Crawler {
                 {
                     doc = Jsoup.connect(URL).get();
                    // pivotList.add(new Content(URL));
+                    Robotstxt R= new Robotstxt(URL);
+                    if(R.isAllowed()!=true)
+                    {
+                        System.out.println("A robot.txt does not allow you to enter this link : \n"+URL);
+                        return;
+                    }
                     String title = doc.title();
                     String content = doc.body().text();
                     String h1 = doc.getElementsByTag("h1").text();
@@ -82,13 +93,17 @@ public class Crawler {
                     String h4 = doc.getElementsByTag("h4").text();
                     String h5 = doc.getElementsByTag("h5").text();
                     String h6 = doc.getElementsByTag("h6").text();
-                    //String p = doc.getElementsByTag("p").text();
+
+                    String p = doc.getElementsByTag("p").text();
                     String list = doc.getElementsByTag("li").text();
                     String OrderedList = doc.getElementsByTag("ol").text();
                     String UnorderedList = doc.getElementsByTag("ul").text();
                     String td = doc.getElementsByTag("td").text();
                     String th = doc.getElementsByTag("th").text();
-                    String description = doc.getElementsByTag("td").text();
+                    String date= doc.getElementsByTag("datePublished").text();
+                    //System.out.println(date);
+
+                   // String description = doc.getElementsByTag("td").text();
                     Elements metatags= doc.getElementsByTag("meta");
                     for( Element metatag:metatags){
                         String name= metatag.attr("name");
@@ -118,7 +133,7 @@ public class Crawler {
 
 
                   //  connect.setURLcontent(urls.get(index).getLink(), urls.get(index).getTitle(), urls.get(index).getContent(),urls.get(index).getH1(),urls.get(index).getH2(),urls.get(index).getH3(),urls.get(index).getH4(),urls.get(index).getH5(),urls.get(index).getH6());
-                    connect.setURLcontent(URL,title, content,h1,h2,h3,h4,h5,h6);
+                    connect.setURLcontent(URL,title, content,h1,h2,h3,h4,h5,h6,p,list,OrderedList,UnorderedList,td,th,date);
                 }
 
             } catch (IllegalArgumentException | SQLException e )
@@ -133,6 +148,8 @@ public class Crawler {
             {
 
             }
+            catch (Exception E)
+            {}
 
     }
 

@@ -1,10 +1,14 @@
 package Scrapping;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
+
 import Scrapping.*;
 public class Main {
     public static void main(String args[]) throws IOException {
@@ -19,9 +23,6 @@ public class Main {
         //seedSet.add(new Content("https://www.gutenberg.org"));
         Crawler C = new Crawler(seedSet);
 
-
-
-
         try {
             C.Crawling();
 
@@ -29,15 +30,10 @@ public class Main {
         } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
-         C.printURLslist();
-        System.out.println(C.getURLslistSize());
+         //C.printURLslist();
+       // System.out.println(C.getURLslistSize());
 
-       /* List <URLS> urls= new ArrayList<>();
-        urls = C.getURLslist();
-        DBconnection connect = new DBconnection();
-        connect.GetData();
-        connect.SetURLsTable(urls);*/
-        //connect.GetData();
+
 
     }
 }
