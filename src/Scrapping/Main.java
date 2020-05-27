@@ -7,31 +7,42 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import Scrapping.*;
 public class Main {
     public static void main(String args[]) throws IOException {
 
-       // String StartURL = "https://www.google.com";
+
         List<Content> seedSet = new ArrayList<>();
-        seedSet.add(new Content("https://www.fifa.com/worldcup/"));
-        seedSet.add(new Content("https://en.wikipedia.org/wiki/FIFA_World_Cup"));
-        seedSet.add(new Content("https://www.rugbyworldcup.com/2021"));
-        seedSet.add(new Content("https://www.gutenberg.org/"));
+        seedSet.add(new Content("https://sports.yahoo.com/"));
+        seedSet.add(new Content("https://www.espn.com/"));
+        seedSet.add(new Content("https://www.bleacherreport.com/"));
+        seedSet.add(new Content("https://www.cbssports.com/"));
+        seedSet.add(new Content("https://www.si.com/"));
+        seedSet.add(new Content("https://www.foxsports.com/"));
+        seedSet.add(new Content("https://www.fifa.com/"));
+        seedSet.add(new Content("https://www.marca.com/"));
+        seedSet.add(new Content("https://www.hupu.com/"));
+        seedSet.add(new Content("https://www.starva.com/"));
+        seedSet.add(new Content("https://www.nbcsports.com/"));
+        seedSet.add(new Content("https://en.as.com/"));
 
-        //seedSet.add(new Content("https://www.gutenberg.org"));
-        Crawler C = new Crawler(seedSet);
+        System.out.println("Please enter the no. of threads from 1 to 12: ");
+        Scanner myInput = new Scanner( System.in );
+        int N = myInput.nextInt();
 
-        try {
-            C.Crawling();
-
-        } catch (IllegalArgumentException i) {
-        } catch (IOException | SQLException e) {
-            e.printStackTrace();
+        for (int i =0 ;i < N ;i ++)
+        {
+            List <Content>url=new ArrayList<>();
+            url.add(new Content(seedSet.get(i).getLink()));
+            new Thread(new Crawler(url)).start();
         }
-         //C.printURLslist();
-       // System.out.println(C.getURLslistSize());
+
+        //Crawler C = new Crawler(seedSet);
+
+
 
 
 

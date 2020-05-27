@@ -54,8 +54,23 @@ public class DBconnection {
         }
         return URLS;
     }
+    public List<Content> getUncrawledUrls() throws SQLException {
+        List<Content> URLS= new ArrayList<>();
+        String query = "select * from urls where Crawled=0";
+        rs = st.executeQuery(query);
+        while (rs.next()) {
+
+            URLS.add(new Content(rs.getString("URL")));
+
+        }
+        return URLS;
+    }
+    public void setCrawled(String url) throws SQLException {
 
 
+        String query= "UPDATE `urls` SET `Crawled`=1 WHERE URL='"+url+"' ";
+        st.executeUpdate(query);
+    }
     public void setURLcontent(String url,String title,String content,String H1,String H2,String H3, String H4, String H5, String H6,String p, String list,String OL, String UOL, String td, String th,String Date) {
         try {
                 String titleRep=title.replaceAll("'","''");

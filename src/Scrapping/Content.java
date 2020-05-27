@@ -18,6 +18,7 @@ public class Content {
     private String OrderedList;
     private String UnorderedList;
     private boolean Visited;
+    private boolean Crawled;
 
     public Content (String link,String Title, String Content,String H1,String H2,String H3,String H4,String H5,String H6,String Td,String Th,String Description,String list,String OrderedList,String UnorderedList)
     {
@@ -123,6 +124,14 @@ public class Content {
     public String getUnorderedList() { return UnorderedList; }
 
     public void setUnorderedList(String unorderedList) { UnorderedList = unorderedList; }
+    public void setCrawled(boolean x)
+    {
+        this.Crawled=x;
+    }
+    public boolean getCrawled()
+    {
+        return this.Crawled;
+    }
 
 }
 

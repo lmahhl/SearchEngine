@@ -25,12 +25,17 @@ public class Robotstxt {
             URL url = new URL(base + "/robots.txt");
             HttpURLConnection huc = (HttpURLConnection) url.openConnection();
 
-            int responseCode = huc.getResponseCode();
+           // huc.setRequestMethod ("GET");  //OR  huc.setRequestMethod ("HEAD");
+            huc.setConnectTimeout(5000);
+            huc.setReadTimeout(5000);//This is to prevent url connection hangs
+            huc.setRequestProperty("Connection", "close");
+            huc.connect () ;
+            //int responseCode = huc.getResponseCode() ;
 
-            if (HttpURLConnection.HTTP_OK == responseCode) {
+            //if (HttpURLConnection.HTTP_OK == responseCode) {
                 List<String> disAllowed = new ArrayList<String>();
                 // read text returned by server
-                BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+                BufferedReader in = new BufferedReader(new InputStreamReader(huc.getInputStream()));
 
                 String line;
                 String text = "";
@@ -132,12 +137,12 @@ public class Robotstxt {
                }
 
 
-            }
+            //}
 
-            else
-            {
+           // else
+           // {
                 return true;
-            }
+           // }
 
 
 

@@ -23,22 +23,32 @@ import java.util.List;
 
 import javax.xml.parsers.*;
 import org.w3c.dom.*;
-public class Crawler {
+public class Crawler implements Runnable{
 
     private List<Content> pivotList;
     DBconnection connect = new DBconnection();
-
+    boolean afterSS=false;
     public Crawler(List <Content> pivotList) {
         this.pivotList=pivotList;
 
 
     }
+    @Override
+    public void run() {
+        try {
+            System.out.println("A thread has started");
+            Crawling();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
-
-    public void Crawling() throws IOException, SQLException {
+    public synchronized void Crawling() throws IOException, SQLException {
 
         //List<Content> New = new ArrayList<>();
-        for (int i=0; i < pivotList.size();i++) {
+       for (int i=0; i < pivotList.size();i++) {
             if(pivotList.get(i).getVisited())
             {
                 continue;
@@ -46,7 +56,10 @@ public class Crawler {
             pivotList.get(i).setVisited(true);
             Document D;
             // Connecting to a URL
-
+            if(afterSS) {
+                pivotList.get(i).setCrawled(true);
+                connect.setCrawled(pivotList.get(i).getLink());
+            }
             D = Jsoup.connect(pivotList.get(i).getLink()).header("Accept-Language", "en").get();
             // Getting the links in it
             Elements links = D.select("a[href]");
@@ -60,8 +73,11 @@ public class Crawler {
             }
            // pivotList.addAll(New);
         }
+        System.out.println("first loop done");
+
         pivotList.clear();
-        pivotList.addAll(connect.getUrls());
+        afterSS=true;
+        pivotList.addAll(connect.getUncrawledUrls());
         Crawling();
 
     }
@@ -74,12 +90,13 @@ public class Crawler {
             Document doc;
             // Connecting to a URL
             try {
-                int index = urls.size()-1;
+                //int index = urls.size()-1;
                 if(isVisited(connect.getUrls(),URL)==false)
                 {
                     doc = Jsoup.connect(URL).get();
+                    System.out.println("last link entered with thread "+Thread.currentThread().getName()+" url : \n"+URL);
                    // pivotList.add(new Content(URL));
-                    Robotstxt R= new Robotstxt(URL);
+                   Robotstxt R= new Robotstxt(URL);
                     if(R.isAllowed()!=true)
                     {
                         System.out.println("A robot.txt does not allow you to enter this link : \n"+URL);
@@ -100,9 +117,14 @@ public class Crawler {
                     String UnorderedList = doc.getElementsByTag("ul").text();
                     String td = doc.getElementsByTag("td").text();
                     String th = doc.getElementsByTag("th").text();
-                    String date= doc.getElementsByTag("datePublished").text();
-                    //System.out.println(date);
+                    //String date= doc.getElementsByTag("datePublished").text();
+                    String date= doc.getElementsByAttribute("pubdate").text();
+                    String x = doc.getElementsByTag("time").attr("itemprob").toString();
 
+                    if(!x.isBlank())
+                    {
+                        date=x;
+                    }
                    // String description = doc.getElementsByTag("td").text();
                     Elements metatags= doc.getElementsByTag("meta");
                     for( Element metatag:metatags){
@@ -114,7 +136,7 @@ public class Crawler {
                         }
                     }
 
-
+                   //
                     /*urls.get(index).setTitle(title);
                     urls.get(index).setContent(content);
                     urls.get(index).setH1(h1);
@@ -133,7 +155,7 @@ public class Crawler {
 
 
                   //  connect.setURLcontent(urls.get(index).getLink(), urls.get(index).getTitle(), urls.get(index).getContent(),urls.get(index).getH1(),urls.get(index).getH2(),urls.get(index).getH3(),urls.get(index).getH4(),urls.get(index).getH5(),urls.get(index).getH6());
-                    connect.setURLcontent(URL,title, content,h1,h2,h3,h4,h5,h6,p,list,OrderedList,UnorderedList,td,th,date);
+                  connect.setURLcontent(URL,title, content,h1,h2,h3,h4,h5,h6,p,list,OrderedList,UnorderedList,td,th,date);
                 }
 
             } catch (IllegalArgumentException | SQLException e )
@@ -177,4 +199,6 @@ public class Crawler {
         }
         return false;
    }
+
+
 }
