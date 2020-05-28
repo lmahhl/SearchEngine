@@ -3,6 +3,13 @@
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/lib/jsoup-1.13.1.jar!/" />
       <root url="jar://$USER_HOME$/Downloads/mysql-connector-java-5.1.48/mysql-connector-java-5.1.48/mysql-connector-java-5.1.48-bin.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/jar_files/guava-14.0.1.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/jar_files/jackson-annotations-2.2.0.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/jar_files/jackson-core-2.2.0.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/jar_files/jackson-databind-2.2.0.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/jar_files/maxminddb-0.3.0.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/geoip-api-1.2.10.jar/geoip-api-1.2.10.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/geoip2-2.13.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

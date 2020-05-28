@@ -1,5 +1,7 @@
 package Scrapping;
 
+import com.maxmind.geoip.Location;
+import com.maxmind.geoip.regionName;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.UnsupportedMimeTypeException;
@@ -7,16 +9,15 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.xml.sax.SAXException;
-
+import com.maxmind.geoip.LookupService;
 import javax.net.ssl.SSLHandshakeException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.io.IOException;
-import java.net.ConnectException;
-import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
+import java.io.InterruptedIOException;
+import java.net.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,26 +27,34 @@ import org.w3c.dom.*;
 public class Crawler implements Runnable{
 
     private List<Content> pivotList;
+    private List<Content> tobeCrawled;
     DBconnection connect = new DBconnection();
     boolean afterSS=false;
+    boolean stopCrawling=false;
     public Crawler(List <Content> pivotList) {
         this.pivotList=pivotList;
-
-
+        tobeCrawled=new ArrayList<>();
     }
     @Override
     public void run() {
         try {
-            System.out.println("A thread has started");
-            Crawling();
+            System.out.println("A thread has started with link");
+            for(int i =0;i<pivotList.size();i++)
+                System.out.println(pivotList.get(i).getLink());
+                Crawling();
+                return;
         } catch (IOException e) {
             e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        catch (InterruptedException ie)
+        {
+            return;
+        }
     }
 
-    public synchronized void Crawling() throws IOException, SQLException {
+    public synchronized void Crawling() throws IOException, SQLException,InterruptedException {
 
         //List<Content> New = new ArrayList<>();
        for (int i=0; i < pivotList.size();i++) {
@@ -56,10 +65,7 @@ public class Crawler implements Runnable{
             pivotList.get(i).setVisited(true);
             Document D;
             // Connecting to a URL
-            if(afterSS) {
-                pivotList.get(i).setCrawled(true);
-                connect.setCrawled(pivotList.get(i).getLink());
-            }
+
             D = Jsoup.connect(pivotList.get(i).getLink()).header("Accept-Language", "en").get();
             // Getting the links in it
             Elements links = D.select("a[href]");
@@ -67,25 +73,35 @@ public class Crawler implements Runnable{
 
             for (Element link : links) {
 
-
-                searchContent(link.attr("href"),pivotList);
+                if(stopCrawling)
+                {
+                    return;
+                }
+                searchContent(link.attr("href"),pivotList.get(i).getLink());
 
             }
-           // pivotList.addAll(New);
+           if(afterSS) {
+               pivotList.get(i).setCrawled(true);
+               connect.setCrawled(pivotList.get(i).getLink());
+           }
         }
         System.out.println("first loop done");
 
         pivotList.clear();
         afterSS=true;
-        pivotList.addAll(connect.getUncrawledUrls());
+        pivotList.addAll(tobeCrawled);
         Crawling();
 
     }
 
 
-    public void searchContent(String URL,List<Content> urls) throws IOException {
+    public void searchContent(String URL,String pUrl) throws IOException, SQLException {
 
-
+            if(connect.getCount()>5000)
+            {
+                stopCrawling=true;
+                return;
+            }
 
             Document doc;
             // Connecting to a URL
@@ -117,14 +133,37 @@ public class Crawler implements Runnable{
                     String UnorderedList = doc.getElementsByTag("ul").text();
                     String td = doc.getElementsByTag("td").text();
                     String th = doc.getElementsByTag("th").text();
-                    //String date= doc.getElementsByTag("datePublished").text();
                     String date= doc.getElementsByAttribute("pubdate").text();
                     String x = doc.getElementsByTag("time").attr("itemprob").toString();
-
                     if(!x.isBlank())
                     {
                         date=x;
                     }
+
+                    String loc="";
+                    InetAddress address = InetAddress.getByName(new URL(URL).getHost());
+                    String ip = address.getHostAddress();
+                    File dbFile = new File("GeoLiteCity.dat");
+                    LookupService lookupService = new LookupService(dbFile, LookupService.GEOIP_MEMORY_CACHE);
+
+                    Location location = lookupService.getLocation(ip);
+                    if (location != null) {
+                        location.region = regionName.regionNameByCode(location.countryCode, location.region);
+                        loc = location.countryName;
+                    }
+                    Element image = doc.select("img").first();
+                    String imageURL=image.absUrl("src");
+                    String imgD=image.getElementsByAttribute("alt").text();
+                    Element Title=doc.select("img[title]").first();
+                    String imageDescription=Title.attr("title");
+                    if(!imgD.isBlank())
+                    {
+                        imageDescription=imgD;
+                    }
+
+
+
+
                    // String description = doc.getElementsByTag("td").text();
                     Elements metatags= doc.getElementsByTag("meta");
                     for( Element metatag:metatags){
@@ -155,7 +194,13 @@ public class Crawler implements Runnable{
 
 
                   //  connect.setURLcontent(urls.get(index).getLink(), urls.get(index).getTitle(), urls.get(index).getContent(),urls.get(index).getH1(),urls.get(index).getH2(),urls.get(index).getH3(),urls.get(index).getH4(),urls.get(index).getH5(),urls.get(index).getH6());
-                  connect.setURLcontent(URL,title, content,h1,h2,h3,h4,h5,h6,p,list,OrderedList,UnorderedList,td,th,date);
+                  //connect.setURLcontent(URL,title, content,h1,h2,h3,h4,h5,h6,p,list,OrderedList,UnorderedList,td,th,date,loc);
+                  //connect.setURLRelation(URL,pUrl);
+                  if(image!=null)
+                  {
+                      connect.setImage(imageURL,imageDescription,title);
+                  }
+                  tobeCrawled.add(new Content(URL));
                 }
 
             } catch (IllegalArgumentException | SQLException e )
