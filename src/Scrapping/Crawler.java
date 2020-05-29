@@ -28,6 +28,7 @@ public class Crawler implements Runnable{
 
     private List<Content> pivotList;
     private List<Content> tobeCrawled;
+    long start = System.nanoTime();
     DBconnection connect = new DBconnection();
     boolean afterSS=false;
     boolean stopCrawling=false;
@@ -81,8 +82,9 @@ public class Crawler implements Runnable{
 
             }
            if(afterSS) {
-               pivotList.get(i).setCrawled(true);
+               //pivotList.get(i).setCrawled(true);
                connect.setCrawled(pivotList.get(i).getLink());
+               connect.removeFromBackup(pivotList.get(i).getLink());
            }
         }
         System.out.println("first loop done");
@@ -97,7 +99,7 @@ public class Crawler implements Runnable{
 
     public void searchContent(String URL,String pUrl) throws IOException, SQLException {
 
-            if(connect.getCount()>5000)
+            if(System.nanoTime() - start > 600E9)
             {
                 stopCrawling=true;
                 return;
@@ -107,8 +109,8 @@ public class Crawler implements Runnable{
             // Connecting to a URL
             try {
                 //int index = urls.size()-1;
-                if(isVisited(connect.getUrls(),URL)==false)
-                {
+               // if(isVisited(connect.getUrls(),URL)==false)
+               // {
                     doc = Jsoup.connect(URL).get();
                     System.out.println("last link entered with thread "+Thread.currentThread().getName()+" url : \n"+URL);
                    // pivotList.add(new Content(URL));
@@ -152,13 +154,19 @@ public class Crawler implements Runnable{
                         loc = location.countryName;
                     }
                     Element image = doc.select("img").first();
-                    String imageURL=image.absUrl("src");
-                    String imgD=image.getElementsByAttribute("alt").text();
-                    Element Title=doc.select("img[title]").first();
-                    String imageDescription=Title.attr("title");
-                    if(!imgD.isBlank())
-                    {
-                        imageDescription=imgD;
+                    if(image!=null) {
+                        String imageURL = image.absUrl("src");
+                        String imgD = image.getElementsByAttribute("alt").text();
+                        Element Title = doc.select("img[title]").first();
+                        String imageDescription="";
+                        if(Title!=null) {
+                            imageDescription = Title.attr("title");
+                            if (!imgD.isBlank()) {
+                                imageDescription = imgD;
+                            }
+                        }
+
+                        connect.setImage(imageURL,imageDescription,title);
                     }
 
 
@@ -192,31 +200,29 @@ public class Crawler implements Runnable{
                     urls.get(index).setDescription(description);*/
 
 
+                  connect.setURLcontent(URL,title, content,h1,h2,h3,h4,h5,h6,p,list,OrderedList,UnorderedList,td,th,date,loc);
+                  connect.setURLRelation(URL,pUrl);
 
-                  //  connect.setURLcontent(urls.get(index).getLink(), urls.get(index).getTitle(), urls.get(index).getContent(),urls.get(index).getH1(),urls.get(index).getH2(),urls.get(index).getH3(),urls.get(index).getH4(),urls.get(index).getH5(),urls.get(index).getH6());
-                  //connect.setURLcontent(URL,title, content,h1,h2,h3,h4,h5,h6,p,list,OrderedList,UnorderedList,td,th,date,loc);
-                  //connect.setURLRelation(URL,pUrl);
-                  if(image!=null)
-                  {
-                      connect.setImage(imageURL,imageDescription,title);
-                  }
                   tobeCrawled.add(new Content(URL));
-                }
+                  connect.addtoBackup(URL);
+                //}
 
             } catch (IllegalArgumentException | SQLException e )
             {
-
+               // e.printStackTrace();
             }
             catch ( HttpStatusException  |ConnectException  | SocketTimeoutException | MalformedURLException | SSLHandshakeException connectException)
             {
-
+               // connectException.printStackTrace();
             }
             catch ( UnknownHostException | UnsupportedMimeTypeException ex)
             {
-
+               // ex.printStackTrace();
             }
             catch (Exception E)
-            {}
+            {
+               // E.printStackTrace();
+            }
 
     }
 

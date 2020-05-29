@@ -121,4 +121,47 @@ public class DBconnection {
         String query = "INSERT INTO `imageurls` (`IURL`,`TITLE`,`DESCRIPTION`) VALUES ('"+imageURL+"', '"+imageTitleRep+"', '"+imageDescriptionRep+"') ";
         st.execute(query);
     }
+
+    public boolean checkTable() throws SQLException {
+        String query = "select * from urls";
+        rs = st.executeQuery(query);
+        if(rs.next())
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public void addtoBackup(String url) throws SQLException {
+        String query = "INSERT INTO `backup` (`URL`) VALUES ('"+url+"') ";
+        st.execute(query);
+
+    }
+
+    public void removeFromBackup(String link) throws SQLException {
+        String query = "DELETE FROM `backup` WHERE  URL='"+link+"' ";
+        st.execute(query);
+    }
+    public List<Content> getBackupUrls() throws SQLException {
+        List<Content> URLS= new ArrayList<>();
+        String query = "select * from backup";
+        rs = st.executeQuery(query);
+        while (rs.next()) {
+
+            URLS.add(new Content(rs.getString("URL")));
+
+        }
+        return URLS;
+    }
+
+    public void deleteallTables() throws SQLException {
+        String query = "truncate urls";
+        String query1 = "truncate urlrs";
+        String query2 = "truncate backup";
+        String query3 = "truncate imageurls";
+        st.execute(query);
+        st.execute(query1);
+        st.execute(query2);
+        st.execute(query3);
+    }
 }
