@@ -78,10 +78,9 @@ public class DBconnection {
         r.close();
         return count;
     }
-    public void setURLcontent(String url,String title,String content,String H1,String H2,String H3, String H4, String H5, String H6,String p, String list,String OL, String UOL, String td, String th,String Date,String Location) {
+    public void setURLcontent(String url,String title,String PURL,String H1,String H2,String H3, String H4, String H5, String H6,String p, String list,String OL, String UOL, String td, String th,String Date,String Location) {
         try {
                 String titleRep=title.replaceAll("'","''");
-                String contentRep= content.replaceAll("'","''");
                 String H1Rep=H1.replaceAll("'","''");
                 String H2Rep= H2.replaceAll("'","''");
                 String H3Rep=H3.replaceAll("'","''");
@@ -102,8 +101,10 @@ public class DBconnection {
 
 
 
-                String query = "INSERT INTO `urls` (`ID`, `URL`,`TITLE`,`CONTENT`,`H1`,`H2`,`H3`,`H4`,`H5`,`H6`,`P`,`LIST`,`OL`,`UOL`,`TD`,`TH`,`PUBDATE`,`LOCATION`) VALUES (NULL, '"+url+"','"+titleRep+"' , '"+contentRep+"', '"+H1Rep+"', '"+H2Rep+"', '"+H3Rep+"', '"+H4Rep+"', '"+H5Rep+"', '"+H6Rep+"', '"+pRep+"', '"+listRep+"', '"+OLRep+"', '"+UOLRep+"', '"+tdRep+"', '"+thRep+"', '"+dateRep+"', '"+locationRep+"')";
+                String query = "INSERT INTO `urls` (`ID`, `URL`,`TITLE`,`H1`,`H2`,`H3`,`H4`,`H5`,`H6`,`P`,`LIST`,`OL`,`UOL`,`TD`,`TH`,`PUBDATE`,`LOCATION`) VALUES (NULL, '"+url+"','"+titleRep+"' , '"+H1Rep+"', '"+H2Rep+"', '"+H3Rep+"', '"+H4Rep+"', '"+H5Rep+"', '"+H6Rep+"', '"+pRep+"', '"+listRep+"', '"+OLRep+"', '"+UOLRep+"', '"+tdRep+"', '"+thRep+"', '"+dateRep+"', '"+locationRep+"')";
                 st.execute(query);
+                String query2="UPDATE `urls` SET `OUTLINKS`=`OUTLINKS`+1 WHERE URL='"+PURL+"'";
+                st.execute(query2);
 
         } catch (Exception E) {
             System.out.println(E);

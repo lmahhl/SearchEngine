@@ -55,7 +55,7 @@ public class Crawler implements Runnable{
         }
     }
 
-    public synchronized void Crawling() throws IOException, SQLException,InterruptedException {
+    public void Crawling() throws IOException, SQLException,InterruptedException {
 
         //List<Content> New = new ArrayList<>();
        for (int i=0; i < pivotList.size();i++) {
@@ -99,7 +99,7 @@ public class Crawler implements Runnable{
 
     public void searchContent(String URL,String pUrl) throws IOException, SQLException {
 
-            if(System.nanoTime() - start > 600E9)
+            if(System.nanoTime() - start > 3600E9)
             {
                 stopCrawling=true;
                 return;
@@ -109,8 +109,8 @@ public class Crawler implements Runnable{
             // Connecting to a URL
             try {
                 //int index = urls.size()-1;
-               // if(isVisited(connect.getUrls(),URL)==false)
-               // {
+                if(isVisited(connect.getUrls(),URL)==false)
+                {
                     doc = Jsoup.connect(URL).get();
                     System.out.println("last link entered with thread "+Thread.currentThread().getName()+" url : \n"+URL);
                    // pivotList.add(new Content(URL));
@@ -121,7 +121,6 @@ public class Crawler implements Runnable{
                         return;
                     }
                     String title = doc.title();
-                    String content = doc.body().text();
                     String h1 = doc.getElementsByTag("h1").text();
                     String h2 = doc.getElementsByTag("h2").text();
                     String h3 = doc.getElementsByTag("h3").text();
@@ -172,16 +171,7 @@ public class Crawler implements Runnable{
 
 
 
-                   // String description = doc.getElementsByTag("td").text();
-                    Elements metatags= doc.getElementsByTag("meta");
-                    for( Element metatag:metatags){
-                        String name= metatag.attr("name");
-                        content= metatag.attr("content");
-                        String  Description;
-                        if (name.equals("description")){
-                            Description=content;
-                        }
-                    }
+
 
                    //
                     /*urls.get(index).setTitle(title);
@@ -200,12 +190,12 @@ public class Crawler implements Runnable{
                     urls.get(index).setDescription(description);*/
 
 
-                  connect.setURLcontent(URL,title, content,h1,h2,h3,h4,h5,h6,p,list,OrderedList,UnorderedList,td,th,date,loc);
+                  connect.setURLcontent(URL,title,pUrl,h1,h2,h3,h4,h5,h6,p,list,OrderedList,UnorderedList,td,th,date,loc);
                   connect.setURLRelation(URL,pUrl);
 
                   tobeCrawled.add(new Content(URL));
                   connect.addtoBackup(URL);
-                //}
+                }
 
             } catch (IllegalArgumentException | SQLException e )
             {
@@ -239,7 +229,7 @@ public class Crawler implements Runnable{
             System.out.println("----------------------------");
         }
     }
-   public boolean isVisited(List<Content>urls,String URL)
+   public synchronized boolean isVisited(List<Content>urls,String URL)
    {
         for(int i=0;i<urls.size();i++)
         {

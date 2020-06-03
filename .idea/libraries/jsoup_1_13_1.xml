@@ -10,8 +10,18 @@
       <root url="jar://$USER_HOME$/Downloads/jar_files/maxminddb-0.3.0.jar!/" />
       <root url="jar://$USER_HOME$/Downloads/geoip-api-1.2.10.jar/geoip-api-1.2.10.jar!/" />
       <root url="jar://$USER_HOME$/Downloads/geoip2-2.13.1.jar!/" />
+      <root url="jar://$USER_HOME$/Desktop/freetts-1.2.2.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/jar_files (2)/api-common-1.1.0.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/jar_files (2)/guava-19.0.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/jar_files (2)/jsr305-3.0.0.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/jar_files (2)/proto-google-cloud-speech-v1_1beta1-0.1.21.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/jar_files (2)/proto-google-common-protos-0.1.21.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/jar_files (2)/protobuf-java-3.3.0.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/Downloads/jar_files (2)/api-common-1.1.0.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/jar_files (2)/jsr305-3.0.0.jar!/" />
+    </SOURCES>
   </library>
 </component>
